@@ -59,7 +59,7 @@ async def predict(files: List[UploadFile] = File(...)):
 
             # Enviando imagen a cloud storages            
             client = storage.Client.from_service_account_json(json_credentials_path='credenciales.json')
-            bucket = client.get_bucket('pruebas-all-unica')
+            bucket = client.get_bucket('')
 
             for i in range(file_count):
                 object_name_in_gcs_bucket = bucket.blob(f"zombi{i}.png")
