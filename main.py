@@ -1,13 +1,17 @@
 from fastapi import FastAPI, File, UploadFile
 from werkzeug.utils import secure_filename
+from google.cloud import storage
 from typing import List
+import os
 
 app = FastAPI()
 
 
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = "uploads/images"
 ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg"]) #Formatos de imagenes permitidos
 
+PROJECT_ID = 'pruebas-all'
+BUCKET = 'pruebas-all-unica'
 
 # Funcion obtiene el tipo de archivo
 def allowed_file(filename):
@@ -26,11 +30,21 @@ async def predict(files: List[UploadFile] = File(...)):
         if file and allowed_file(filename):
             print("\nImagen recibida:", filename)
             contents = await file.read()
-            filename = (filename)
+            filename = secure_filename(filename)
             tmpfile = "".join([UPLOAD_FOLDER, "/", filename])
             with open(tmpfile, "wb") as f:
                 f.write(contents)
             print("Archivo:", tmpfile)
             tmpfiles.append(tmpfile)
 
-            return 'Todo Correcto'
+            #Directorio de las imagenes descargadas
+            path, dirs, files = next(os.walk("uploads/images/"))
+            file_count = len(files)
+
+            # Enviando imagen a cloud storages            
+            client = storage.Client.from_service_account_json(json_credentials_path='credenciales.json')
+            bucket = client.get_bucket('pruebas-all-unica')
+
+            for i in range(file_count):
+                object_name_in_gcs_bucket = bucket.blob(f"zombi{i}.png")
+                object_name_in_gcs_bucket.upload_from_filename(f"uploads/images/zombi{i}.jpg")

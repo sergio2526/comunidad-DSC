@@ -2,3 +2,6 @@ FastAPI
 uvicorn
 python-multipart
 werkzeug
+google-cloud-vision
+google-cloud-storage
+Wand==0.5.8 # #Se encarga de aplicar el filtro blur
